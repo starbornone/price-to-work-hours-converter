@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 250px;
+      padding: 20px;
+      margin: 0;
+      background-color: #f9f9f9;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+      display: block;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:active {
+      background-color: #003f7f;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Set Wage and Currency</h2>
+
+  <label for="wageInput">Hourly Wage (or enter yearly wage below):</label>
+  <input id="wageInput" type="number" placeholder="Your hourly wage" />
+
+  <label for="yearlyWageInput">Yearly Wage:</label>
+  <input id="yearlyWageInput" type="number" placeholder="Your yearly wage" />
+
+  <label for="hoursPerDayInput">Hours per Day:</label>
+  <input id="hoursPerDayInput" type="number" placeholder="Hours you work per day" />
+
+  <label for="currencySelect">Currency:</label>
+  <select id="currencySelect">
+    <option value="AUD">AUD</option>
+    <option value="USD">USD</option>
+    <option value="EUR">EUR</option>
+    <option value="GBP">GBP</option>
+  </select>
+
+  <button id="saveBtn">Save</button>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
