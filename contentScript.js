@@ -5,10 +5,17 @@ window.addEventListener("load", () => {
   }, 500);
 });
 
+// Initialize floating div when the DOM content is fully loaded
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    loadWageAndProcessPage();
+  }, 500);
+});
+
 function loadWageAndProcessPage() {
   loadSettings((data) => {
     const hourlyWage = parseFloat(data.hourlyWage);
-    const userCurrency = data.userCurrency || "USD";
+    const userCurrency = data.userCurrency || "AUD";
     const workHoursPerDay = data.workHoursPerDay || 7.6;
 
     if (!hourlyWage || isNaN(hourlyWage)) {
@@ -17,38 +24,54 @@ function loadWageAndProcessPage() {
     }
 
     loadCurrencyForDomain((domainCurrency) => {
-      const currency = domainCurrency || userCurrency;
-      const elements = document.querySelectorAll("*:not(script):not(style)");
-      const uniquePrices = new Set();
-      const results = [];
-
-      results.push(`Hourly wage: ${hourlyWage}`);
-      results.push(`Currency: ${currency}`);
-      results.push("Prices found on this page:");
-
-      elements.forEach((el) => {
-        const textContent = el.textContent;
-        const priceInfo = extractPrice(textContent);
-
-        if (priceInfo && !uniquePrices.has(priceInfo.price)) {
-          uniquePrices.add(priceInfo.price);
-          const { price } = priceInfo;
-          const resultText = convertPriceToHours(
-            price,
-            hourlyWage,
-            workHoursPerDay
-          );
-          results.push(`${price} ${currency} (~${resultText})`);
-        }
-      });
-
-      if (results.length > 0) {
-        updateFloatingDiv(results);
-      } else {
-        updateFloatingDiv(["No prices found on this page."]);
-      }
+      processPagePrices(
+        hourlyWage,
+        userCurrency,
+        domainCurrency || "AUD",
+        workHoursPerDay
+      );
     });
   });
+}
+
+function processPagePrices(
+  hourlyWage,
+  userCurrency,
+  domainCurrency,
+  workHoursPerDay
+) {
+  const elements = document.querySelectorAll("*:not(script):not(style)");
+  const uniquePrices = new Set();
+  const results = [];
+
+  results.push(`Hourly wage: ${hourlyWage}`);
+  results.push(`User Currency: ${userCurrency}`);
+  results.push(`Domain Currency: ${domainCurrency}`);
+  results.push("Prices found on this page:");
+
+  elements.forEach((el) => {
+    const textContent = el.textContent;
+    const priceInfo = extractPrice(textContent); // Extract price in domain currency
+
+    if (priceInfo && !uniquePrices.has(priceInfo.price)) {
+      uniquePrices.add(priceInfo.price);
+      const { price } = priceInfo;
+      const resultText = convertPriceToHours(
+        price,
+        hourlyWage,
+        workHoursPerDay
+      );
+      results.push(
+        ` - ${price} ${domainCurrency} (~${resultText} in ${userCurrency})`
+      );
+    }
+  });
+
+  if (results.length > 0) {
+    updateFloatingDiv(results);
+  } else {
+    updateFloatingDiv(["No prices found on this page."]);
+  }
 }
 
 // Manually convert a user-entered price to work hours
