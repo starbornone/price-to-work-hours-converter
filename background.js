@@ -1,25 +1,33 @@
-const CACHE_EXPIRATION_HOURS = 24; // Cache exchange rates for 24 hours
+const CACHE_EXPIRATION_HOURS = 24;
 
-// Function to fetch exchange rates in the background
 async function fetchExchangeRates(baseCurrency) {
-  const API_KEY = "00262605769bc0997a9ed877"; // Replace with your API key
   try {
+    const data = await new Promise((resolve) => {
+      chrome.storage.sync.get("apiKey", resolve);
+    });
+
+    const apiKey = data.apiKey;
+    if (!apiKey) {
+      console.error("API key is not set.");
+      return null;
+    }
+
     const response = await fetch(
-      `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/${baseCurrency}`
+      `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${baseCurrency}`
     );
-    const data = await response.json();
+    const exchangeData = await response.json();
+
     if (response.ok) {
-      // Store the rates and timestamp in local storage
       const newRates = {
         timestamp: Date.now(),
-        rates: { [baseCurrency]: data.conversion_rates },
+        rates: { [baseCurrency]: exchangeData.conversion_rates },
       };
       chrome.storage.local.set({ exchangeRatesCache: newRates }, () => {
         console.log("Exchange rates cached in background");
       });
       return newRates.rates;
     } else {
-      console.error("Error fetching exchange rates:", data);
+      console.error("Error fetching exchange rates:", exchangeData);
       return null;
     }
   } catch (error) {
@@ -28,14 +36,12 @@ async function fetchExchangeRates(baseCurrency) {
   }
 }
 
-// Function to check if the cache is expired
 function isCacheExpired(cacheTimestamp) {
   const now = Date.now();
-  const hoursSinceLastFetch = (now - cacheTimestamp) / (1000 * 60 * 60); // Convert milliseconds to hours
+  const hoursSinceLastFetch = (now - cacheTimestamp) / (1000 * 60 * 60);
   return hoursSinceLastFetch > CACHE_EXPIRATION_HOURS;
 }
 
-// Function to get cached exchange rates or fetch new ones if expired
 function getExchangeRates(baseCurrency, callback) {
   chrome.storage.local.get("exchangeRatesCache", async (result) => {
     const cachedRates = result.exchangeRatesCache;
@@ -50,7 +56,6 @@ function getExchangeRates(baseCurrency, callback) {
   });
 }
 
-// Listen for messages from the content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "getExchangeRate") {
     const { userCurrency, detectedCurrency } = message;
@@ -58,7 +63,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const exchangeRate = rates ? rates[userCurrency] : null;
       sendResponse({ exchangeRate });
     });
-    return true; // Indicates that we will send a response asynchronously
+    return true;
   }
 });
 
@@ -72,7 +77,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ currency: data[domain] });
       });
     });
-    return true; // Indicates that we will send a response asynchronously
+    return true;
   }
 
   if (message.action === "saveDomainCurrency") {
@@ -80,11 +85,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const url = new URL(tabs[0].url);
       const domain = url.hostname;
 
-      // Save the selected currency for this domain
       chrome.storage.sync.set({ [domain]: message.currency }, function () {
         sendResponse({ status: "Currency saved for domain" });
       });
     });
-    return true; // Indicates that we will send a response asynchronously
+    return true;
   }
 });
