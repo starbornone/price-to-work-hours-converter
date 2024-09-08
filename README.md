@@ -7,11 +7,21 @@
 
 ## Features
 
-- Automatically detects prices on e-commerce websites and converts them into hours or days of work.
-- Allows users to input their hourly wage, daily working hours, and currency.
-- Manual price input for on-the-fly conversions.
-- Supports a wide range of currencies, dynamically converting prices.
-- Saves user preferences and can remember the selected currency for specific websites.
+Automatically detects prices on e-commerce websites and converts them into hours or days of work.
+
+![Automatically detects prices on e-commerce websites and converts them into hours or days of work.](https://res.cloudinary.com/starborn/image/upload/v1725757582/price-to-work-hours-converter/brave_bsTw1Tf1RB_hs7ole.png)
+
+Allows users to input their hourly wage, daily working hours, and currency.
+
+Supports a wide range of currencies, dynamically converting prices.
+
+Saves user preferences and can remember the selected currency for specific websites.
+
+![Allows users to input their hourly wage, daily working hours, and currency.](https://res.cloudinary.com/starborn/image/upload/v1725757584/price-to-work-hours-converter/YkQ7kM9r2j_xt6jh4.gif)
+
+Manual price input for on-the-fly conversions.
+
+![Manual price input for on-the-fly conversions.](https://res.cloudinary.com/starborn/image/upload/v1725757687/price-to-work-hours-converter/mUu63eg0FI_usjetu.gif)
 
 ## Installation
 
