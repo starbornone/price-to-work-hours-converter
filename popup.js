@@ -1,5 +1,5 @@
 function calculateHourlyWageFromYearly(yearlyWage, hoursPerDay) {
-  const workDaysPerYear = 260; // Assume 5 days a week, 52 weeks a year
+  const workDaysPerYear = 260;
   const totalHoursPerYear = hoursPerDay * workDaysPerYear;
   return yearlyWage / totalHoursPerYear;
 }
@@ -53,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("apiKeyInput").value = data.apiKey;
       }
 
-      // Load the detected domain currency for the current website
       chrome.runtime.sendMessage(
         { action: "getDomainCurrency" },
         function (response) {
@@ -68,19 +67,23 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 });
 
-// Event listener for the "Check Prices" button
 document.addEventListener("DOMContentLoaded", function () {
   const checkPricesBtn = document.getElementById("checkPricesBtn");
+
   if (checkPricesBtn) {
     checkPricesBtn.addEventListener("click", function () {
-      chrome.runtime.sendMessage({ action: "checkPrices" });
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          function: loadWageAndProcessPage,
+        });
+      });
     });
   } else {
     console.error("checkPricesBtn not found in the DOM");
   }
 });
 
-// Event listener for the "Calculate Hours" button
 document
   .getElementById("calculateHoursBtn")
   .addEventListener("click", function () {
@@ -92,7 +95,6 @@ document
     }
   });
 
-// Save the global settings including wage and currency
 document.getElementById("saveBtn").addEventListener("click", function () {
   const wageInput = document.getElementById("wageInput").value;
   const yearlyWageInput = document.getElementById("yearlyWageInput").value;
@@ -124,7 +126,6 @@ document.getElementById("saveBtn").addEventListener("click", function () {
         apiKey: apiKey,
       },
       function () {
-        // Save the selected domain currency
         chrome.runtime.sendMessage(
           { action: "saveDomainCurrency", currency: domainCurrency },
           function () {

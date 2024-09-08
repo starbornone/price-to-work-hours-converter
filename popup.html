@@ -5,63 +5,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      font-family: Lexend, Arial, sans-serif;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      width: 300px;
-      padding: 20px;
+      font-family: Lexend, Arial, sans-serif;
+      width: 24rem;
+      padding: 1.25rem;
       margin: 0;
       background-color: #f9f9f9;
     }
 
-    h2 {
-      text-align: center;
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .section {
-      border: 1px solid #ddd;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 8px;
+    .section,
+    .results {
+      border: 0.0625rem solid #ddd;
+      padding: 0.9375rem;
+      margin-bottom: 1.25rem;
+      border-radius: 0.5rem;
       background-color: #fff;
     }
 
     .section-title {
-      font-size: 16px;
+      font-size: 1rem;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 0.625rem;
       color: #555;
     }
 
     label {
-      font-size: 14px;
+      font-size: 0.875rem;
       color: #555;
-      margin-top: 10px;
+      margin-top: 0.625rem;
       display: block;
+    }
+
+    .description {
+      font-size: 0.75rem;
+      color: #777;
+      margin-top: 0.3125rem;
+      margin-bottom: 0.3125rem;
     }
 
     input,
     select {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
+      padding: 0.625rem;
+      margin-top: 0.3125rem;
+      margin-bottom: 1.25rem;
+      border: 0.0625rem solid #ccc;
+      border-radius: 0.25rem;
       box-sizing: border-box;
     }
 
     button {
       width: 100%;
-      padding: 10px;
+      padding: 0.625rem;
       background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 4px;
-      font-size: 16px;
+      border-radius: 0.25rem;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
@@ -72,6 +75,13 @@
 
     button:active {
       background-color: #003f7f;
+    }
+
+    #manualPriceResult {
+      font-weight: bold;
+      font-size: 1rem;
+      text-align: center;
+      margin-top: 0.625rem;
     }
   </style>
 </head>
@@ -127,7 +137,7 @@
 
   <div class="section">
     <div class="section-title">Set Wage, Currency, and API Key</div>
-    <p>Either set Hourly Wage or Yearly Wage and Hours per Day.</p>
+    <p>Either set Hourly Wage or Yearly Wage and Hours per Day. We recommend using the amount you get after tax.</p>
     <label for="wageInput">Hourly Wage:</label>
     <input id="wageInput" type="number" placeholder="Your hourly wage" />
     <label for="yearlyWageInput">Yearly Wage:</label>
@@ -170,6 +180,8 @@
       <option value="VND">VND - Vietnamese Dong</option>
     </select>
     <label for="apiKeyInput">API Key:</label>
+    <p class="description">Get a free API key from <a href="https://app.exchangerate-api.com/"
+        target="_blank">ExchangeRate-API</a>.</p>
     <input id="apiKeyInput" type="text" placeholder="Enter your API Key" />
     <button id="saveBtn">Save</button>
   </div>

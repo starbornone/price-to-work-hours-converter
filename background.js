@@ -74,10 +74,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const domain = url.hostname;
 
       chrome.storage.sync.get(domain, function (data) {
-        sendResponse({ currency: data[domain] || "AUD" }); // Default to AUD if no currency saved
+        sendResponse({ currency: data[domain] || "AUD" });
       });
     });
-    return true; // Indicates that we will send a response asynchronously
+    return true;
   }
 
   if (message.action === "saveDomainCurrency") {
@@ -85,11 +85,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const url = new URL(tabs[0].url);
       const domain = url.hostname;
 
-      // Save the selected domain currency for this domain
       chrome.storage.sync.set({ [domain]: message.currency }, function () {
         sendResponse({ status: "Domain currency saved for domain" });
       });
     });
-    return true; // Indicates that we will send a response asynchronously
+    return true;
   }
 });
