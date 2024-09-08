@@ -4,6 +4,41 @@ function calculateHourlyWageFromYearly(yearlyWage, hoursPerDay) {
   return yearlyWage / totalHoursPerYear;
 }
 
+function calculateManualPriceToHours() {
+  chrome.storage.sync.get(["hourlyWage", "workHoursPerDay"], function (data) {
+    const hourlyWage = parseFloat(data.hourlyWage);
+    const workHoursPerDay = data.workHoursPerDay || 7.6;
+    const manualPrice = parseFloat(
+      document.getElementById("manualPriceInput").value
+    );
+
+    if (!hourlyWage || isNaN(hourlyWage)) {
+      alert("Please set your hourly wage first.");
+      return;
+    }
+
+    if (!manualPrice || isNaN(manualPrice)) {
+      alert("Please enter a valid price.");
+      return;
+    }
+
+    const hoursRequired = (manualPrice / hourlyWage).toFixed(2);
+    let displayText = `${hoursRequired} hours of work`;
+
+    if (hoursRequired > 8) {
+      const daysRequired = (hoursRequired / workHoursPerDay).toFixed(2);
+      displayText += ` (~${daysRequired} days of work)`;
+    }
+
+    const manualPriceResult = document.getElementById("manualPriceResult");
+    if (manualPriceResult) {
+      manualPriceResult.textContent = displayText;
+    } else {
+      console.error("manualPriceResult element not found.");
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   chrome.storage.sync.get(
     ["hourlyWage", "userCurrency", "apiKey"],
@@ -33,7 +68,31 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 });
 
-// Save the global settings including domain-specific currency and user currency
+// Event listener for the "Check Prices" button
+document.addEventListener("DOMContentLoaded", function () {
+  const checkPricesBtn = document.getElementById("checkPricesBtn");
+  if (checkPricesBtn) {
+    checkPricesBtn.addEventListener("click", function () {
+      chrome.runtime.sendMessage({ action: "checkPrices" });
+    });
+  } else {
+    console.error("checkPricesBtn not found in the DOM");
+  }
+});
+
+// Event listener for the "Calculate Hours" button
+document
+  .getElementById("calculateHoursBtn")
+  .addEventListener("click", function () {
+    const manualPrice = document.getElementById("manualPriceInput").value;
+    if (manualPrice) {
+      calculateManualPriceToHours();
+    } else {
+      alert("Please enter a valid price.");
+    }
+  });
+
+// Save the global settings including wage and currency
 document.getElementById("saveBtn").addEventListener("click", function () {
   const wageInput = document.getElementById("wageInput").value;
   const yearlyWageInput = document.getElementById("yearlyWageInput").value;
@@ -65,7 +124,7 @@ document.getElementById("saveBtn").addEventListener("click", function () {
         apiKey: apiKey,
       },
       function () {
-        // Save the selected domain currency for the current domain
+        // Save the selected domain currency
         chrome.runtime.sendMessage(
           { action: "saveDomainCurrency", currency: domainCurrency },
           function () {

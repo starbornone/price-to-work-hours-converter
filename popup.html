@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      width: 250px;
+      width: 300px;
       padding: 20px;
       margin: 0;
       background-color: #f9f9f9;
@@ -18,6 +18,21 @@
       font-size: 18px;
       margin-bottom: 20px;
       color: #333;
+    }
+
+    .section {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background-color: #fff;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #555;
     }
 
     label {
@@ -37,13 +52,6 @@
       border-radius: 4px;
       font-size: 14px;
       box-sizing: border-box;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: #007bff;
-      outline: none;
-      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
 
     button {
@@ -69,94 +77,102 @@
 </head>
 
 <body>
-  <h2>Set Wage and Currency</h2>
+  <div class="section">
+    <div class="section-title">Set Domain Currency</div>
+    <label for="domainCurrencySelect">Domain Currency:</label>
+    <select id="domainCurrencySelect">
+      <option value="AED">AED - UAE Dirham</option>
+      <option value="ARS">ARS - Argentine Peso</option>
+      <option value="AUD" selected>AUD - Australian Dollar</option>
+      <option value="BRL">BRL - Brazilian Real</option>
+      <option value="CAD">CAD - Canadian Dollar</option>
+      <option value="CHF">CHF - Swiss Franc</option>
+      <option value="CZK">CZK - Czech Koruna</option>
+      <option value="DKK">DKK - Danish Krone</option>
+      <option value="EUR">EUR - Euro</option>
+      <option value="GBP">GBP - British Pound</option>
+      <option value="PHP">PHP - Philippine Peso</option>
+      <option value="HKD">HKD - Hong Kong Dollar</option>
+      <option value="HUF">HUF - Hungarian Forint</option>
+      <option value="INR">INR - Indian Rupee</option>
+      <option value="ILS">ILS - Israeli Shekel</option>
+      <option value="ISK">ISK - Icelandic Króna</option>
+      <option value="JPY">JPY - Japanese Yen</option>
+      <option value="KRW">KRW - South Korean Won</option>
+      <option value="MXN">MXN - Mexican Peso</option>
+      <option value="NOK">NOK - Norwegian Krone</option>
+      <option value="NGN">NGN - Nigerian Naira</option>
+      <option value="NZD">NZD - New Zealand Dollar</option>
+      <option value="PLN">PLN - Polish Zloty</option>
+      <option value="RUB">RUB - Russian Ruble</option>
+      <option value="ZAR">ZAR - South African Rand</option>
+      <option value="SAR">SAR - Saudi Riyal</option>
+      <option value="SEK">SEK - Swedish Krona</option>
+      <option value="SGD">SGD - Singapore Dollar</option>
+      <option value="THB">THB - Thai Baht</option>
+      <option value="TRY">TRY - Turkish Lira</option>
+      <option value="USD">USD - US Dollar</option>
+      <option value="VND">VND - Vietnamese Dong</option>
+    </select>
+    <button id="checkPricesBtn">Check Prices</button>
+  </div>
 
-  <label for="wageInput">Hourly Wage (or enter yearly wage below):</label>
-  <input id="wageInput" type="number" placeholder="Your hourly wage" />
+  <div class="section">
+    <div class="section-title">Calculate Hours Manually</div>
+    <label for="manualPriceInput">Enter Price to Convert:</label>
+    <input id="manualPriceInput" type="number" placeholder="Enter price to convert" />
+    <button id="calculateHoursBtn">Calculate Hours</button>
+    <p id="manualPriceResult" style="font-weight: bold; text-align: center; margin-top: 10px;"></p>
+  </div>
 
-  <label for="yearlyWageInput">Yearly Wage:</label>
-  <input id="yearlyWageInput" type="number" placeholder="Your yearly wage" />
-
-  <label for="hoursPerDayInput">Hours per Day:</label>
-  <input id="hoursPerDayInput" type="number" placeholder="Hours you work per day" />
-
-  <label for="userCurrencySelect">User Currency (Your Wage):</label>
-  <select id="userCurrencySelect">
-    <option value="AED">AED - UAE Dirham</option>
-    <option value="ARS">ARS - Argentine Peso</option>
-    <option value="AUD" selected>AUD - Australian Dollar</option>
-    <option value="BRL">BRL - Brazilian Real</option>
-    <option value="CAD">CAD - Canadian Dollar</option>
-    <option value="CHF">CHF - Swiss Franc</option>
-    <option value="CZK">CZK - Czech Koruna</option>
-    <option value="DKK">DKK - Danish Krone</option>
-    <option value="EUR">EUR - Euro</option>
-    <option value="GBP">GBP - British Pound</option>
-    <option value="PHP">PHP - Philippine Peso</option>
-    <option value="HKD">HKD - Hong Kong Dollar</option>
-    <option value="HUF">HUF - Hungarian Forint</option>
-    <option value="INR">INR - Indian Rupee</option>
-    <option value="ILS">ILS - Israeli Shekel</option>
-    <option value="ISK">ISK - Icelandic Króna</option>
-    <option value="JPY">JPY - Japanese Yen</option>
-    <option value="KRW">KRW - South Korean Won</option>
-    <option value="MXN">MXN - Mexican Peso</option>
-    <option value="NOK">NOK - Norwegian Krone</option>
-    <option value="NGN">NGN - Nigerian Naira</option>
-    <option value="NZD">NZD - New Zealand Dollar</option>
-    <option value="PLN">PLN - Polish Zloty</option>
-    <option value="RUB">RUB - Russian Ruble</option>
-    <option value="ZAR">ZAR - South African Rand</option>
-    <option value="SAR">SAR - Saudi Riyal</option>
-    <option value="SEK">SEK - Swedish Krona</option>
-    <option value="SGD">SGD - Singapore Dollar</option>
-    <option value="THB">THB - Thai Baht</option>
-    <option value="TRY">TRY - Turkish Lira</option>
-    <option value="USD">USD - US Dollar</option>
-    <option value="VND">VND - Vietnamese Dong</option>
-  </select>
-
-  <label for="domainCurrencySelect">Domain Currency (Detected):</label>
-  <select id="domainCurrencySelect">
-    <option value="AED">AED - UAE Dirham</option>
-    <option value="ARS">ARS - Argentine Peso</option>
-    <option value="AUD" selected>AUD - Australian Dollar</option>
-    <option value="BRL">BRL - Brazilian Real</option>
-    <option value="CAD">CAD - Canadian Dollar</option>
-    <option value="CHF">CHF - Swiss Franc</option>
-    <option value="CZK">CZK - Czech Koruna</option>
-    <option value="DKK">DKK - Danish Krone</option>
-    <option value="EUR">EUR - Euro</option>
-    <option value="GBP">GBP - British Pound</option>
-    <option value="PHP">PHP - Philippine Peso</option>
-    <option value="HKD">HKD - Hong Kong Dollar</option>
-    <option value="HUF">HUF - Hungarian Forint</option>
-    <option value="INR">INR - Indian Rupee</option>
-    <option value="ILS">ILS - Israeli Shekel</option>
-    <option value="ISK">ISK - Icelandic Króna</option>
-    <option value="JPY">JPY - Japanese Yen</option>
-    <option value="KRW">KRW - South Korean Won</option>
-    <option value="MXN">MXN - Mexican Peso</option>
-    <option value="NOK">NOK - Norwegian Krone</option>
-    <option value="NGN">NGN - Nigerian Naira</option>
-    <option value="NZD">NZD - New Zealand Dollar</option>
-    <option value="PLN">PLN - Polish Zloty</option>
-    <option value="RUB">RUB - Russian Ruble</option>
-    <option value="ZAR">ZAR - South African Rand</option>
-    <option value="SAR">SAR - Saudi Riyal</option>
-    <option value="SEK">SEK - Swedish Krona</option>
-    <option value="SGD">SGD - Singapore Dollar</option>
-    <option value="THB">THB - Thai Baht</option>
-    <option value="TRY">TRY - Turkish Lira</option>
-    <option value="USD">USD - US Dollar</option>
-    <option value="VND">VND - Vietnamese Dong</option>
-  </select>
-
-  <label for="apiKeyInput">Exchange Rate API Key:</label>
-  <input id="apiKeyInput" type="text" placeholder="Required for currency conversions" />
-
-  <button id="saveBtn">Save</button>
-
+  <div class="section">
+    <div class="section-title">Set Wage, Currency, and API Key</div>
+    <p>Either set Hourly Wage or Yearly Wage and Hours per Day.</p>
+    <label for="wageInput">Hourly Wage:</label>
+    <input id="wageInput" type="number" placeholder="Your hourly wage" />
+    <label for="yearlyWageInput">Yearly Wage:</label>
+    <input id="yearlyWageInput" type="number" placeholder="Your yearly wage" />
+    <label for="hoursPerDayInput">Hours per Day:</label>
+    <input id="hoursPerDayInput" type="number" placeholder="Hours you work per day" />
+    <label for="userCurrencySelect">Your Currency:</label>
+    <select id="userCurrencySelect">
+      <option value="AED">AED - UAE Dirham</option>
+      <option value="ARS">ARS - Argentine Peso</option>
+      <option value="AUD" selected>AUD - Australian Dollar</option>
+      <option value="BRL">BRL - Brazilian Real</option>
+      <option value="CAD">CAD - Canadian Dollar</option>
+      <option value="CHF">CHF - Swiss Franc</option>
+      <option value="CZK">CZK - Czech Koruna</option>
+      <option value="DKK">DKK - Danish Krone</option>
+      <option value="EUR">EUR - Euro</option>
+      <option value="GBP">GBP - British Pound</option>
+      <option value="PHP">PHP - Philippine Peso</option>
+      <option value="HKD">HKD - Hong Kong Dollar</option>
+      <option value="HUF">HUF - Hungarian Forint</option>
+      <option value="INR">INR - Indian Rupee</option>
+      <option value="ILS">ILS - Israeli Shekel</option>
+      <option value="ISK">ISK - Icelandic Króna</option>
+      <option value="JPY">JPY - Japanese Yen</option>
+      <option value="KRW">KRW - South Korean Won</option>
+      <option value="MXN">MXN - Mexican Peso</option>
+      <option value="NOK">NOK - Norwegian Krone</option>
+      <option value="NGN">NGN - Nigerian Naira</option>
+      <option value="NZD">NZD - New Zealand Dollar</option>
+      <option value="PLN">PLN - Polish Zloty</option>
+      <option value="RUB">RUB - Russian Ruble</option>
+      <option value="ZAR">ZAR - South African Rand</option>
+      <option value="SAR">SAR - Saudi Riyal</option>
+      <option value="SEK">SEK - Swedish Krona</option>
+      <option value="SGD">SGD - Singapore Dollar</option>
+      <option value="THB">THB - Thai Baht</option>
+      <option value="TRY">TRY - Turkish Lira</option>
+      <option value="USD">USD - US Dollar</option>
+      <option value="VND">VND - Vietnamese Dong</option>
+    </select>
+    <label for="apiKeyInput">API Key:</label>
+    <input id="apiKeyInput" type="text" placeholder="Enter your API Key" />
+    <button id="saveBtn">Save</button>
+  </div>
 
   <script src="popup.js"></script>
 </body>

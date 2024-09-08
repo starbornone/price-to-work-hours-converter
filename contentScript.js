@@ -44,10 +44,9 @@ function processPagePrices(
   const uniquePrices = new Set();
   const results = [];
 
-  results.push(`Hourly wage: ${hourlyWage}`);
-  results.push(`User Currency: ${userCurrency}`);
-  results.push(`Domain Currency: ${domainCurrency}`);
-  results.push("Prices found on this page:");
+  results.push(hourlyWage);
+  results.push(userCurrency);
+  results.push(domainCurrency);
 
   elements.forEach((el) => {
     const textContent = el.textContent;
@@ -67,6 +66,7 @@ function processPagePrices(
     }
   });
 
+  // Use updateFloatingDiv from ui.js
   if (results.length > 0) {
     updateFloatingDiv(results);
   } else {
@@ -74,33 +74,20 @@ function processPagePrices(
   }
 }
 
-// Manually convert a user-entered price to work hours
-function calculateManualPriceToHours() {
-  chrome.storage.sync.get(["hourlyWage", "workHoursPerDay"], function (data) {
-    const hourlyWage = parseFloat(data.hourlyWage);
-    const workHoursPerDay = data.workHoursPerDay || 7.6;
-    const manualPrice = parseFloat(
-      document.getElementById("manualPriceInput").value
-    );
+// Ensure the DOM is fully loaded before trying to access elements
+document.addEventListener("DOMContentLoaded", function () {
+  const checkPricesBtn = document.getElementById("checkPricesBtn");
 
-    if (!hourlyWage || isNaN(hourlyWage)) {
-      alert("Please set your hourly wage first.");
-      return;
-    }
+  if (checkPricesBtn) {
+    checkPricesBtn.addEventListener("click", function () {
+      // Create or show the floating div
+      const floatingDiv = createFloatingDiv();
+      floatingDiv.style.display = "block"; // Ensure the div is visible
 
-    if (!manualPrice || isNaN(manualPrice)) {
-      alert("Please enter a valid price.");
-      return;
-    }
-
-    const hoursRequired = (manualPrice / hourlyWage).toFixed(2);
-    let displayText = `${hoursRequired} hours of work`;
-
-    if (hoursRequired > 8) {
-      const daysRequired = (hoursRequired / workHoursPerDay).toFixed(2);
-      displayText += ` (~${daysRequired} days of work)`;
-    }
-
-    document.getElementById("manualPriceResult").textContent = displayText;
-  });
-}
+      // Trigger the processing of prices when the button is clicked
+      loadWageAndProcessPage();
+    });
+  } else {
+    console.error("checkPricesBtn not found in the DOM.");
+  }
+});
