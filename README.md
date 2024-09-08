@@ -123,4 +123,4 @@ If you would like to contribute to this project, feel free to submit a pull requ
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the CC BY-NC-SA 4.0 License.
