@@ -3,16 +3,15 @@
 **Version**: 0.1  
 **Description**: This Chrome extension converts prices on e-commerce websites into hours of work, helping users understand the time-cost of products based on their hourly wage.
 
-**Note**: This extension is a **work in progress**. While the core functionality is implemented, additional features and improvements are planned for future versions. Your feedback and suggestions are welcome!
+**Note**: This extension is a **work in progress**. Some of the core functionality is implemented and additional features and improvements are planned for future versions.
 
 ## Features
 
 - Automatically detects prices on e-commerce websites and converts them into hours or days of work.
-- Allows users to input their hourly wage, daily working hours, and preferred currency.
+- Allows users to input their hourly wage, daily working hours, and currency.
 - Manual price input for on-the-fly conversions.
-- Supports a wide range of global currencies, dynamically converting prices.
-- Easy-to-use floating interface with a "Check Prices" button and input fields for manual conversion.
-- Saves user preferences (hourly wage and preferred currency) globally, and can remember the selected currency for specific websites.
+- Supports a wide range of currencies, dynamically converting prices.
+- Saves user preferences and can remember the selected currency for specific websites.
 
 ## Installation
 
@@ -26,21 +25,19 @@
 
 1. **Set Your Hourly Wage**:
    - Click on the extension icon in the Chrome toolbar to open the settings.
-   - Enter your hourly wage and select your global preferred currency from the dropdown. This will be used for all calculations unless a specific website currency is detected or chosen.
+   - Enter your hourly wage and select your currency from the dropdown.
 
 2. **Check Prices**:
    - The extension automatically detects prices on e-commerce websites and converts them into hours of work.
-   - You can also use the floating window to manually recheck the prices by clicking the "Check Prices" button.
 
 3. **Manual Price Conversion**:
-   - Enter a price in the provided input field in the floating window to calculate how many hours or days of work it represents.
+   - Enter a price in the provided input field to calculate how many hours or days of work it represents.
 
 4. **Floating Window**:
-   - The floating window appears at the top-right of the page, showing prices in terms of hours or days of work. You can close or reopen this window at any time.
+   - The floating window appears at the top-right of the page, showing prices in terms of hours or days of work. You can close or reopen this window at any time. You can also drag it around the screen.
 
 5. **Currency Selection**:
-   - By default, the extension will use your globally set currency (e.g., AUD, USD, EUR).
-   - If the website's currency differs, the extension attempts to detect the currency used on the site. You can also manually change the currency for that specific website.
+   - The extension attempts to detect the currency used on the site. You can also manually change the currency for that specific website.
 
 ## Supported Currencies
 
@@ -83,9 +80,9 @@ The extension supports a wide range of currencies, including:
 
 The following settings can be configured:
 
-- **Hourly Wage**: Set your wage, which is used for all work-hour calculations.
-- **Work Hours per Day**: Define how many hours you typically work in a day to display results in both hours and days if applicable.
-- **Global Currency**: Choose a default currency for conversion, with options to change it per website.
+- **Hourly Wage** and **Yearly Wage**: Set your wage, which is used for all work-hour calculations.
+- **Work Hours per Day**: Define how many hours you typically work in a day to display results in both hours and days if applicable. This isn't required if you enter an Hourly Wage, but it helps also display work-day calculations.
+- **Currency**: Choose your currency for conversion.
 
 ## Development
 
@@ -115,13 +112,14 @@ This extension requires the following permissions:
 
 Planned features for future versions include:
 
-- **Multi-language support**.
-- **Improved currency detection** for international websites.
-- **Automatic exchange rate updates** for more accurate conversions.
+- Only run when the user clicks "Check Prices".
+- Multi-language support.
+- Improved currency detection.
+- Improved display of work hours.
 
 ## Contributing
 
-If you would like to contribute to this project, feel free to submit a pull request or open an issue on GitHub with suggestions or bug reports.
+If you would like to contribute to this project, feel free to submit a pull request or open an issue on GitLab with suggestions or bug reports.
 
 ## License
 
