@@ -5,43 +5,73 @@ function calculateHourlyWageFromYearly(yearlyWage, hoursPerDay) {
 }
 
 function calculateManualPriceToHours() {
-  chrome.storage.sync.get(["hourlyWage", "workHoursPerDay"], function (data) {
-    const hourlyWage = parseFloat(data.hourlyWage);
-    const workHoursPerDay = data.workHoursPerDay || 7.6;
-    const manualPrice = parseFloat(
-      document.getElementById("manualPriceInput").value
-    );
+  chrome.storage.sync.get(
+    ["hourlyWage", "workHoursPerDay", "userCurrency"],
+    function (data) {
+      const hourlyWage = parseFloat(data.hourlyWage);
+      const workHoursPerDay = parseFloat(data.workHoursPerDay) || 7.6;
+      const userCurrency = data.userCurrency || "AUD";
+      const domainCurrency =
+        document.getElementById("domainCurrencySelect").value || "AUD";
+      const manualPrice = parseFloat(
+        document.getElementById("manualPriceInput").value
+      );
 
-    if (!hourlyWage || isNaN(hourlyWage)) {
-      alert("Please set your hourly wage first.");
+      if (!hourlyWage || isNaN(hourlyWage)) {
+        alert("Please set your hourly wage first.");
+        return;
+      }
+
+      if (!manualPrice || isNaN(manualPrice)) {
+        alert("Please enter a valid price.");
+        return;
+      }
+
+      getExchangeRate(userCurrency, domainCurrency, (exchangeRate) => {
+        if (exchangeRate == null) {
+          alert(
+            "Could not load exchange rates. Check your API key and try again."
+          );
+          return;
+        }
+
+        const priceInUserCurrency = manualPrice * exchangeRate;
+        const displayText = convertPriceToHours(
+          priceInUserCurrency,
+          hourlyWage,
+          workHoursPerDay
+        );
+
+        const manualPriceResult = document.getElementById("manualPriceResult");
+        if (manualPriceResult) {
+          manualPriceResult.textContent = `${displayText} (${domainCurrency} → ${userCurrency})`;
+        }
+      });
+    }
+  );
+}
+
+function requestCheckPrices() {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    const tab = tabs && tabs[0];
+    if (!tab || tab.id == null) {
+      alert("No active tab to check.");
       return;
     }
 
-    if (!manualPrice || isNaN(manualPrice)) {
-      alert("Please enter a valid price.");
-      return;
-    }
-
-    const hoursRequired = (manualPrice / hourlyWage).toFixed(2);
-    let displayText = `${hoursRequired} hours of work`;
-
-    if (hoursRequired > 8) {
-      const daysRequired = (hoursRequired / workHoursPerDay).toFixed(2);
-      displayText += ` (~${daysRequired} days of work)`;
-    }
-
-    const manualPriceResult = document.getElementById("manualPriceResult");
-    if (manualPriceResult) {
-      manualPriceResult.textContent = displayText;
-    } else {
-      console.error("manualPriceResult element not found.");
-    }
+    chrome.tabs.sendMessage(tab.id, { action: "checkPrices" }, (response) => {
+      if (chrome.runtime.lastError || !response) {
+        alert(
+          "Could not reach this page. Try refreshing it, then click Check Prices again."
+        );
+      }
+    });
   });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   chrome.storage.sync.get(
-    ["hourlyWage", "userCurrency", "apiKey"],
+    ["hourlyWage", "userCurrency", "workHoursPerDay"],
     function (data) {
       if (data.hourlyWage) {
         document.getElementById("wageInput").value = data.hourlyWage;
@@ -49,92 +79,94 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.userCurrency) {
         document.getElementById("userCurrencySelect").value = data.userCurrency;
       }
-      if (data.apiKey) {
-        document.getElementById("apiKeyInput").value = data.apiKey;
+      if (data.workHoursPerDay) {
+        document.getElementById("hoursPerDayInput").value =
+          data.workHoursPerDay;
       }
+
+      loadApiKey((apiKey) => {
+        if (apiKey) {
+          document.getElementById("apiKeyInput").value = apiKey;
+        }
+      });
 
       chrome.runtime.sendMessage(
         { action: "getDomainCurrency" },
         function (response) {
-          const detectedCurrency = response.currency || "AUD";
+          if (chrome.runtime.lastError || !response) {
+            return;
+          }
           const domainCurrencySelect = document.getElementById(
             "domainCurrencySelect"
           );
-          domainCurrencySelect.value = detectedCurrency;
+          domainCurrencySelect.value = response.currency || "AUD";
         }
       );
     }
   );
-});
 
-document.addEventListener("DOMContentLoaded", function () {
-  const checkPricesBtn = document.getElementById("checkPricesBtn");
+  document
+    .getElementById("checkPricesBtn")
+    .addEventListener("click", requestCheckPrices);
 
-  if (checkPricesBtn) {
-    checkPricesBtn.addEventListener("click", function () {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.scripting.executeScript({
-          target: { tabId: tabs[0].id },
-          function: loadWageAndProcessPage,
-        });
-      });
+  document
+    .getElementById("calculateHoursBtn")
+    .addEventListener("click", function () {
+      const manualPrice = document.getElementById("manualPriceInput").value;
+      if (manualPrice) {
+        calculateManualPriceToHours();
+      } else {
+        alert("Please enter a valid price.");
+      }
     });
-  } else {
-    console.error("checkPricesBtn not found in the DOM");
-  }
-});
 
-document
-  .getElementById("calculateHoursBtn")
-  .addEventListener("click", function () {
-    const manualPrice = document.getElementById("manualPriceInput").value;
-    if (manualPrice) {
-      calculateManualPriceToHours();
+  document.getElementById("saveBtn").addEventListener("click", function () {
+    const wageInput = document.getElementById("wageInput").value;
+    const yearlyWageInput = document.getElementById("yearlyWageInput").value;
+    const hoursPerDayInput = document.getElementById("hoursPerDayInput").value;
+    const userCurrency = document.getElementById("userCurrencySelect").value;
+    const domainCurrency =
+      document.getElementById("domainCurrencySelect").value;
+    const apiKey = document.getElementById("apiKeyInput").value.trim();
+
+    const workHoursPerDay = parseFloat(hoursPerDayInput) || 7.6;
+
+    let hourlyWage;
+    if (yearlyWageInput && hoursPerDayInput) {
+      hourlyWage = calculateHourlyWageFromYearly(
+        parseFloat(yearlyWageInput),
+        parseFloat(hoursPerDayInput)
+      );
+    } else if (wageInput) {
+      hourlyWage = parseFloat(wageInput);
     } else {
-      alert("Please enter a valid price.");
+      alert(
+        "Please enter either your hourly wage or your yearly wage and hours per day."
+      );
+      return;
     }
-  });
 
-document.getElementById("saveBtn").addEventListener("click", function () {
-  const wageInput = document.getElementById("wageInput").value;
-  const yearlyWageInput = document.getElementById("yearlyWageInput").value;
-  const hoursPerDayInput = document.getElementById("hoursPerDayInput").value;
-  const userCurrency = document.getElementById("userCurrencySelect").value;
-  const domainCurrency = document.getElementById("domainCurrencySelect").value;
-  const apiKey = document.getElementById("apiKeyInput").value;
+    if (!(hourlyWage > 0) || !apiKey) {
+      alert("Please enter valid wage values and a valid API key.");
+      return;
+    }
 
-  let hourlyWage;
-  if (yearlyWageInput && hoursPerDayInput) {
-    hourlyWage = calculateHourlyWageFromYearly(
-      parseFloat(yearlyWageInput),
-      parseFloat(hoursPerDayInput)
-    );
-  } else if (wageInput) {
-    hourlyWage = parseFloat(wageInput);
-  } else {
-    alert(
-      "Please enter either your hourly wage or your yearly wage and hours per day."
-    );
-    return;
-  }
-
-  if (hourlyWage > 0 && apiKey) {
     chrome.storage.sync.set(
       {
         hourlyWage: hourlyWage,
         userCurrency: userCurrency,
-        apiKey: apiKey,
+        workHoursPerDay: workHoursPerDay,
       },
       function () {
-        chrome.runtime.sendMessage(
-          { action: "saveDomainCurrency", currency: domainCurrency },
-          function () {
-            alert("Settings and currency saved successfully!");
-          }
-        );
+        saveApiKey(apiKey, function () {
+          chrome.runtime.sendMessage(
+            { action: "saveDomainCurrency", currency: domainCurrency },
+            function () {
+              alert("Settings and currency saved successfully!");
+            }
+          );
+        });
       }
     );
-  } else {
-    alert("Please enter valid wage values and a valid API key.");
-  }
+  });
 });

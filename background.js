@@ -1,12 +1,28 @@
 const CACHE_EXPIRATION_HOURS = 24;
 
+function getApiKey(callback) {
+  chrome.storage.local.get("apiKey", (local) => {
+    if (local.apiKey) {
+      callback(local.apiKey);
+      return;
+    }
+
+    chrome.storage.sync.get("apiKey", (sync) => {
+      if (sync.apiKey) {
+        chrome.storage.local.set({ apiKey: sync.apiKey }, () => {
+          chrome.storage.sync.remove("apiKey");
+          callback(sync.apiKey);
+        });
+        return;
+      }
+      callback(null);
+    });
+  });
+}
+
 async function fetchExchangeRates(baseCurrency) {
   try {
-    const data = await new Promise((resolve) => {
-      chrome.storage.sync.get("apiKey", resolve);
-    });
-
-    const apiKey = data.apiKey;
+    const apiKey = await new Promise((resolve) => getApiKey(resolve));
     if (!apiKey) {
       console.error("API key is not set.");
       return null;
@@ -22,14 +38,12 @@ async function fetchExchangeRates(baseCurrency) {
         timestamp: Date.now(),
         rates: { [baseCurrency]: exchangeData.conversion_rates },
       };
-      chrome.storage.local.set({ exchangeRatesCache: newRates }, () => {
-        console.log("Exchange rates cached in background");
-      });
+      chrome.storage.local.set({ exchangeRatesCache: newRates });
       return newRates.rates;
-    } else {
-      console.error("Error fetching exchange rates:", exchangeData);
-      return null;
     }
+
+    console.error("Error fetching exchange rates:", exchangeData);
+    return null;
   } catch (error) {
     console.error("Error fetching exchange rates:", error);
     return null;
@@ -37,43 +51,72 @@ async function fetchExchangeRates(baseCurrency) {
 }
 
 function isCacheExpired(cacheTimestamp) {
-  const now = Date.now();
-  const hoursSinceLastFetch = (now - cacheTimestamp) / (1000 * 60 * 60);
+  const hoursSinceLastFetch =
+    (Date.now() - cacheTimestamp) / (1000 * 60 * 60);
   return hoursSinceLastFetch > CACHE_EXPIRATION_HOURS;
 }
 
 function getExchangeRates(baseCurrency, callback) {
   chrome.storage.local.get("exchangeRatesCache", async (result) => {
     const cachedRates = result.exchangeRatesCache;
-    if (cachedRates && !isCacheExpired(cachedRates.timestamp)) {
-      console.log("Using cached exchange rates");
+    if (
+      cachedRates &&
+      !isCacheExpired(cachedRates.timestamp) &&
+      cachedRates.rates &&
+      cachedRates.rates[baseCurrency]
+    ) {
       callback(cachedRates.rates[baseCurrency]);
-    } else {
-      console.log("Fetching new exchange rates from API");
-      const rates = await fetchExchangeRates(baseCurrency);
-      callback(rates ? rates[baseCurrency] : null);
+      return;
+    }
+
+    const rates = await fetchExchangeRates(baseCurrency);
+    callback(rates ? rates[baseCurrency] : null);
+  });
+}
+
+function getActiveTabHostname(callback) {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tab = tabs && tabs[0];
+    if (!tab || !tab.url) {
+      callback(null);
+      return;
+    }
+
+    try {
+      callback(new URL(tab.url).hostname);
+    } catch {
+      callback(null);
     }
   });
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === "getExchangeRate") {
     const { userCurrency, detectedCurrency } = message;
+    if (!userCurrency || !detectedCurrency) {
+      sendResponse({ exchangeRate: null });
+      return false;
+    }
+
+    if (userCurrency === detectedCurrency) {
+      sendResponse({ exchangeRate: 1 });
+      return false;
+    }
+
     getExchangeRates(detectedCurrency, (rates) => {
       const exchangeRate = rates ? rates[userCurrency] : null;
       sendResponse({ exchangeRate });
     });
     return true;
   }
-});
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "getDomainCurrency") {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const url = new URL(tabs[0].url);
-      const domain = url.hostname;
-
-      chrome.storage.sync.get(domain, function (data) {
+    getActiveTabHostname((domain) => {
+      if (!domain) {
+        sendResponse({ currency: "AUD" });
+        return;
+      }
+      chrome.storage.sync.get(domain, (data) => {
         sendResponse({ currency: data[domain] || "AUD" });
       });
     });
@@ -81,14 +124,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.action === "saveDomainCurrency") {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const url = new URL(tabs[0].url);
-      const domain = url.hostname;
-
-      chrome.storage.sync.set({ [domain]: message.currency }, function () {
+    getActiveTabHostname((domain) => {
+      if (!domain) {
+        sendResponse({ status: "No active tab" });
+        return;
+      }
+      chrome.storage.sync.set({ [domain]: message.currency }, () => {
         sendResponse({ status: "Domain currency saved for domain" });
       });
     });
     return true;
   }
+
+  return false;
 });
