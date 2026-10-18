@@ -25,38 +25,19 @@ function loadWageAndProcessPage() {
     }
 
     loadCurrencyForDomain((domainCurrency) => {
-      const siteCurrency = domainCurrency || "AUD";
-
-      getExchangeRate(userCurrency, siteCurrency, (exchangeRate) => {
-        if (exchangeRate == null) {
-          updateFloatingDiv(
-            "Could not load exchange rates. Check your API key and try again."
-          );
-          return;
-        }
-
-        processPagePrices(
-          hourlyWage,
-          userCurrency,
-          siteCurrency,
-          workHoursPerDay,
-          exchangeRate
-        );
-      });
+      processPagePrices(
+        hourlyWage,
+        userCurrency,
+        domainCurrency || "AUD",
+        workHoursPerDay
+      );
     });
   });
 }
 
-function processPagePrices(
-  hourlyWage,
-  userCurrency,
-  domainCurrency,
-  workHoursPerDay,
-  exchangeRate
-) {
+function collectPagePrices(domainCurrency) {
   if (!document.body) {
-    updateFloatingDiv("Page not ready. Try again in a moment.");
-    return;
+    return null;
   }
 
   const walker = document.createTreeWalker(
@@ -87,7 +68,7 @@ function processPagePrices(
   );
 
   const uniquePrices = new Set();
-  const prices = [];
+  const found = [];
 
   let node;
   while ((node = walker.nextNode())) {
@@ -102,27 +83,59 @@ function processPagePrices(
       continue;
     }
     uniquePrices.add(key);
-
-    // Rate is domainCurrency → userCurrency. Ambiguous/$ amounts use domain currency.
-    // Explicit currencies that differ from the domain still use this rate (limitation).
-    const priceInUserCurrency =
-      currency === userCurrency
-        ? priceInfo.price
-        : priceInfo.price * exchangeRate;
-
-    const resultText = convertPriceToHours(
-      priceInUserCurrency,
-      hourlyWage,
-      workHoursPerDay
-    );
-    prices.push(
-      ` - ${priceInfo.price} ${currency} (~${resultText} in ${userCurrency})`
-    );
+    found.push({ price: priceInfo.price, currency });
   }
 
-  updateFloatingDiv({
-    hourlyWage: `${hourlyWage} ${userCurrency}`,
-    domainCurrency,
-    prices,
+  return found;
+}
+
+function processPagePrices(
+  hourlyWage,
+  userCurrency,
+  domainCurrency,
+  workHoursPerDay
+) {
+  const found = collectPagePrices(domainCurrency);
+  if (found == null) {
+    updateFloatingDiv("Page not ready. Try again in a moment.");
+    return;
+  }
+
+  const bases = [...new Set(found.map((item) => item.currency))];
+
+  getExchangeRatesForBases(userCurrency, bases, (ratesByBase) => {
+    if (!ratesByBase) {
+      updateFloatingDiv(
+        "Could not load exchange rates. Check your API key and try again."
+      );
+      return;
+    }
+
+    const missing = bases.filter(
+      (base) => base !== userCurrency && ratesByBase[base] == null
+    );
+    if (missing.length > 0) {
+      updateFloatingDiv(
+        `Could not load exchange rates for: ${missing.join(", ")}. Check your API key and try again.`
+      );
+      return;
+    }
+
+    const prices = found.map(({ price, currency }) => {
+      const rate = currency === userCurrency ? 1 : ratesByBase[currency];
+      const priceInUserCurrency = price * rate;
+      const resultText = convertPriceToHours(
+        priceInUserCurrency,
+        hourlyWage,
+        workHoursPerDay
+      );
+      return ` - ${price} ${currency} (~${resultText} in ${userCurrency})`;
+    });
+
+    updateFloatingDiv({
+      hourlyWage: `${hourlyWage} ${userCurrency}`,
+      domainCurrency,
+      prices,
+    });
   });
 }

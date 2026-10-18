@@ -44,6 +44,19 @@ function getExchangeRate(userCurrency, detectedCurrency, callback) {
   );
 }
 
+function getExchangeRatesForBases(userCurrency, baseCurrencies, callback) {
+  chrome.runtime.sendMessage(
+    { action: "getExchangeRatesForBases", userCurrency, baseCurrencies },
+    (response) => {
+      if (chrome.runtime.lastError || !response) {
+        callback(null);
+        return;
+      }
+      callback(response.rates || {});
+    }
+  );
+}
+
 function loadApiKey(callback) {
   chrome.storage.local.get("apiKey", (local) => {
     if (local.apiKey) {

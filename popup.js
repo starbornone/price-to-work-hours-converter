@@ -100,6 +100,9 @@ function requestCheckPrices() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  populateCurrencySelect(document.getElementById("domainCurrencySelect"), "AUD");
+  populateCurrencySelect(document.getElementById("userCurrencySelect"), "AUD");
+
   chrome.storage.sync.get(
     ["hourlyWage", "userCurrency", "workHoursPerDay"],
     function (data) {
@@ -107,7 +110,10 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("wageInput").value = data.hourlyWage;
       }
       if (data.userCurrency) {
-        document.getElementById("userCurrencySelect").value = data.userCurrency;
+        populateCurrencySelect(
+          document.getElementById("userCurrencySelect"),
+          data.userCurrency
+        );
       }
       if (data.workHoursPerDay) {
         document.getElementById("hoursPerDayInput").value =
@@ -126,10 +132,10 @@ document.addEventListener("DOMContentLoaded", function () {
           if (chrome.runtime.lastError || !response) {
             return;
           }
-          const domainCurrencySelect = document.getElementById(
-            "domainCurrencySelect"
+          populateCurrencySelect(
+            document.getElementById("domainCurrencySelect"),
+            response.currency || "AUD"
           );
-          domainCurrencySelect.value = response.currency || "AUD";
         }
       );
     }

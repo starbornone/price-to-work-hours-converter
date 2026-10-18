@@ -49,6 +49,8 @@ Bare `$` amounts are treated as the **domain currency** you configured (not assu
 | `contentScript.js` | On-demand page scan when popup sends `checkPrices` |
 | `ui.js` | Floating results panel (created only when needed) |
 | `currency.js` | Price extraction and hours formatting |
+| `currencies.js` | Shared currency list for popup selects |
+| `exchangeCache.js` | Multi-base FX cache merge/lookup helpers |
 | `storage.js` | Settings, domain currency, API key, exchange-rate helpers |
 | `popup.html` / `popup.js` | Settings UI, manual calc, Check Prices |
 
@@ -61,20 +63,21 @@ Bare `$` amounts are treated as the **domain currency** you configured (not assu
 
 Scripts are **not** injected on every page. They load only when you click **Check Prices** (via `activeTab` + `scripting`).
 
-### Tests
+### Tests and lint
 
 ```bash
+npm ci
 npm test
+npm run lint
 ```
 
-Runs Node’s built-in test runner against `test/currency.test.js` (no install required beyond Node 18+).
+CI runs the same checks on pushes and pull requests to `main`.
 
 ## Roadmap
 
 - Broader site-specific price selectors
-- Multi-base exchange-rate cache
 - Multi-language support
-- Lint / CI on pull requests
+- Keyboard accessibility for the floating panel
 
 ## Contributing
 

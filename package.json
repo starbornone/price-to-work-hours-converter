@@ -4,6 +4,12 @@
   "private": true,
   "description": "Chrome extension: convert prices to hours of work",
   "scripts": {
-    "test": "node --test test/**/*.test.js"
+    "test": "node --test test/**/*.test.js",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0"
   }
 }
