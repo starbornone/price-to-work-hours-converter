@@ -1,10 +1,17 @@
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.action === "checkPrices") {
-    loadWageAndProcessPage();
-    sendResponse({ ok: true });
-    return false;
+(() => {
+  if (globalThis.__priceToWorkHoursInitialized) {
+    return;
   }
-});
+  globalThis.__priceToWorkHoursInitialized = true;
+
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message.action === "checkPrices") {
+      loadWageAndProcessPage();
+      sendResponse({ ok: true });
+      return false;
+    }
+  });
+})();
 
 function loadWageAndProcessPage() {
   loadSettings((data) => {
@@ -89,7 +96,6 @@ function processPagePrices(
       continue;
     }
 
-    // Prefer an explicit match currency; otherwise use the user's domain setting.
     const currency = priceInfo.currency || domainCurrency;
     const key = `${priceInfo.price}|${currency}`;
     if (uniquePrices.has(key)) {

@@ -1,17 +1,18 @@
 # Price to Work Hours Converter
 
-**Version**: 0.1  
+**Version**: 0.2  
 **Description**: Chrome extension that converts prices on e-commerce websites into hours of work, based on your hourly wage and currency.
 
 **Note**: This extension is a **work in progress**. See [CODE_REVIEW.md](CODE_REVIEW.md) for the current assessment and remediation plan.
 
 ## Features
 
-- **Check Prices** (opt-in): scans the active tab and shows matched prices as hours/days of work in a floating panel
+- **Check Prices** (opt-in): injects into the active tab only when you click, then shows hours/days of work
 - Wage setup: hourly or yearly wage, hours per day, and your currency
 - Domain currency: remember the currency used on a given website
 - Exchange rates via [ExchangeRate-API](https://www.exchangerate-api.com/) (user-supplied API key)
 - Manual price conversion in the popup
+- US and EU-style number formats (`1,234.56` / `1.234,56`)
 
 ## Installation
 
@@ -54,18 +55,26 @@ Bare `$` amounts are treated as the **domain currency** you configured (not assu
 ### Permissions
 
 - **storage** — wage, currencies, cached rates; API key in `chrome.storage.local`
-- **activeTab** — act on the current tab when you use the popup
-- **scripting** — retained for possible future injection helpers
+- **activeTab** — temporary access to the current tab when you use the popup
+- **scripting** — inject scanners into the active tab on **Check Prices**
 - **host_permissions** — `https://v6.exchangerate-api.com/*` for FX
 
-Content scripts still match `<all_urls>` so messaging works after load, but scanning and the overlay run only when you click **Check Prices**.
+Scripts are **not** injected on every page. They load only when you click **Check Prices** (via `activeTab` + `scripting`).
+
+### Tests
+
+```bash
+npm test
+```
+
+Runs Node’s built-in test runner against `test/currency.test.js` (no install required beyond Node 18+).
 
 ## Roadmap
 
-- Narrower host matches / inject only on demand
-- Better currency and number-format detection
-- Unit tests for `extractPrice` / conversion helpers
+- Broader site-specific price selectors
+- Multi-base exchange-rate cache
 - Multi-language support
+- Lint / CI on pull requests
 
 ## Contributing
 

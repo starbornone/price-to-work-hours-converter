@@ -1,0 +1,9 @@
+{
+  "name": "price-to-work-hours-converter",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Chrome extension: convert prices to hours of work",
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  }
+}

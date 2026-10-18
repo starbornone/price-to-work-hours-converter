@@ -27,7 +27,7 @@ Chrome extension that shows e-commerce prices as hours/days of work from the use
 | ID | Finding | Status |
 |----|---------|--------|
 | C1 | FX fetched in background but never applied to prices | **Done** — wired in content script + manual calc |
-| C2 | Full-DOM scan + floating UI on every page (`<all_urls>`) | **Done** — opt-in via Check Prices; text-node walker; UI on demand |
+| C2 | Full-DOM scan + floating UI on every page (`<all_urls>`) | **Done** — no persistent content_scripts; inject on Check Prices only |
 
 ### High
 
@@ -45,7 +45,7 @@ Chrome extension that shows e-commerce prices as hours/days of work from the use
 | M1 | API key in `chrome.storage.sync` and request URL | **Partial** — moved to `local` (+ sync migrate); still in URL path (API constraint) |
 | M2 | `innerHTML` with storage-derived strings on host pages | **Done** — `textContent` / DOM APIs |
 | M3 | Missing tab / `lastError` guards on messaging | **Done** |
-| M4 | Weak price parsing (EU formats, duplicates, ignored match currency) | Open |
+| M4 | Weak price parsing (EU formats, duplicates, ignored match currency) | **Partial** — EU/US amounts + unit tests; site selectors still open |
 | M5 | Duplicated convert logic in popup vs `currency.js` | **Done** — popup loads `currency.js` |
 
 ### Low

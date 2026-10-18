@@ -51,18 +51,48 @@ function calculateManualPriceToHours() {
   );
 }
 
+function isRestrictedUrl(url) {
+  if (!url) {
+    return true;
+  }
+  return /^(chrome|chrome-extension|edge|about|devtools|view-source):/i.test(
+    url
+  ) || /chrome\.google\.com\/webstore/i.test(url);
+}
+
 function requestCheckPrices() {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs && tabs[0];
     if (!tab || tab.id == null) {
       alert("No active tab to check.");
       return;
     }
 
+    if (isRestrictedUrl(tab.url)) {
+      alert("Can't check prices on this page. Open a regular website tab.");
+      return;
+    }
+
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["currency.js", "storage.js", "ui.js", "contentScript.js"],
+      });
+    } catch (error) {
+      alert(
+        "Could not access this page. " +
+          (error && error.message ? error.message : "Try another site.")
+      );
+      return;
+    }
+
     chrome.tabs.sendMessage(tab.id, { action: "checkPrices" }, (response) => {
       if (chrome.runtime.lastError || !response) {
         alert(
-          "Could not reach this page. Try refreshing it, then click Check Prices again."
+          "Could not scan this page. " +
+            (chrome.runtime.lastError
+              ? chrome.runtime.lastError.message
+              : "Try refreshing and click Check Prices again.")
         );
       }
     });

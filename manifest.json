@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Price to Work Hours Converter",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Convert prices on e-commerce websites into hours of work.",
   "permissions": [
     "storage",
@@ -26,16 +26,5 @@
     "16": "icon-16.png",
     "48": "icon-48.png",
     "128": "icon-128.png"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": [
-        "ui.js",
-        "currency.js",
-        "storage.js",
-        "contentScript.js"
-      ]
-    }
-  ]
+  }
 }
